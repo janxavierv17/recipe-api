@@ -1,0 +1,15 @@
+# Docker compose syntax to use to avoid breaking changes.
+version: "3.9"
+
+services:
+    app:
+        build:
+            context: . # Use current directory.
+            args:
+                - DEV=true # From our Dockerfile to install requirements.dev
+        ports:
+            - "8000:8000" # Access
+        volumes:
+            - ./app:/app # Map directory in our system to our container. To sync local changes to our container without the need to rebuild.
+        command: > # Runs our django app
+            sh -c "python manage.py runserver 0.0.0.0:8000"
