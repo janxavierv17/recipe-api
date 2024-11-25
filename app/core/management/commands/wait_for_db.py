@@ -3,8 +3,8 @@
 import time
 from django.core.management.base import BaseCommand
 from django.db.utils import OperationalError
-from django.core.management.base import BaseCommand
 from psycopg2 import OperationalError as Psycopg2OpError
+
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
@@ -14,11 +14,13 @@ class Command(BaseCommand):
         retry = 1
         while db_up is False:
             try:
-                self.check(databases=['default'])
+                self.check(databases=["default"])
                 db_up = True
             except (Psycopg2OpError, OperationalError):
-                self.stdout.write("Database unavailable, waiting for 1 second & retrying for %d times" % retry)
+                self.stdout.write("Db unavailable")
+                self.stdout.write("Retrying for %d times" % retry)
                 retry += 1
+            self.stdout.write("Sleep for 1 second ...")
             time.sleep(1)
 
         self.stdout.write(self.style.SUCCESS("=== Database is available ==="))
