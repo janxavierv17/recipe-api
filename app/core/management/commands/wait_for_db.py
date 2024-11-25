@@ -8,19 +8,21 @@ from psycopg2 import OperationalError as Psycopg2OpError
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        # Logs a message when our command is ran
-        self.stdout.write("Waiting for database ...")
+        # Initial log message indicating the start of the process
+        self.stdout.write("Waiting for database to be ready...")
+
         db_up = False
         retry = 1
-        while db_up is False:
+        while not db_up:
             try:
+                # Check if the database is available
                 self.check(databases=["default"])
                 db_up = True
             except (Psycopg2OpError, OperationalError):
-                self.stdout.write("Db unavailable")
-                self.stdout.write("Retrying for %d times" % retry)
+                # Log retry attempts with more detail
+                self.stdout.write(f"DB unavailable. Retry attempt {retry}...")
                 retry += 1
-            self.stdout.write("Sleep for 1 second ...")
-            time.sleep(1)
+                time.sleep(1)
 
+        # Log a success message when the database is available
         self.stdout.write(self.style.SUCCESS("=== Database is available ==="))
