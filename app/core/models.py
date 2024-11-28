@@ -6,6 +6,7 @@ from django.contrib.auth.models import (
     BaseUserManager,
     PermissionsMixin,
 )
+from django.conf import settings
 
 
 class UserManager(BaseUserManager):
@@ -47,3 +48,17 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = (
         "email"  # Replace the default field from username to email
     )
+
+
+class Recipe(models.Model):
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    price = models.DecimalField(max_digits=5, decimal_places=2)
+    link = models.CharField(max_length=255, blank=True)
+    time_minutes = models.IntegerField(default=5)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return self.title
