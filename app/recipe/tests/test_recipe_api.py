@@ -190,7 +190,7 @@ class PrivateRecipeAPITests(TestCase):
             "title": "Pongal",
             "time_minutes": 10,
             "price": Decimal("14.50"),
-            "tags": [{"name", "Indian"}, {"name", "Breakfast"}],
+            "tags": [{"name": "Indian"}, {"name": "Breakfast"}],
         }
         res = self.client.post(RECIPES_URL, payload, format="json")
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
