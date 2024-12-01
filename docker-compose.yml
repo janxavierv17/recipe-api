@@ -11,6 +11,7 @@ services:
             - "8000:8000" # Access
         volumes:
             - ./app:/app # Map directory in our system to our container. To sync local changes to our container without the need to rebuild.
+            - dev-static-data:/vol/web
         command: > # Runs our django app
             sh -c "python manage.py wait_for_db && 
                    python manage.py migrate &&
@@ -33,3 +34,4 @@ services:
 
 volumes:
     dev-db-data:
+    dev-static-data:
