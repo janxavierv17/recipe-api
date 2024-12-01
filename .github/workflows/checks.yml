@@ -1,10 +1,8 @@
----
 name: Checks
 on: [push]
 jobs:
     test-lint:
         name: Test & Lint
-        # A runner that comes with a pre-installed docker version
         runs-on: ubuntu-20.04
         steps:
             - name: Login to docker hub
@@ -12,10 +10,24 @@ jobs:
               with:
                   username: ${{secrets.DOCKERHUB_USER}}
                   password: ${{secrets.DOCKERHUB_TOKEN}}
+                  
             - name: Checkout
               uses: actions/checkout@v2
+              
+            - name: Cache Docker layers
+              uses: actions/cache@v2
+              with:
+                path: /tmp/.docker-cache
+                key: ${{ runner.os }}-docker-${{ hashFiles('**/Dockerfile', '**/requirements*.txt') }}
+                restore-keys: |
+                  ${{ runner.os }}-docker-
+                  
+            - name: Build
+              run: |
+                docker compose build --build-arg DEV=true
+                
             - name: Test
-              # I think docker-compose or docker compose will work with the ubuntu version we specified above.
               run: docker compose run --rm app sh -c "python manage.py wait_for_db && python manage.py test"
+              
             - name: Lint
               run: docker compose run --rm app sh -c "flake8"
