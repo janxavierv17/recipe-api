@@ -1,0 +1,51 @@
+# Docker Compose configuration file
+# Defines how services (containers) work together
+
+version: "3.9" # Specifies the version of Docker Compose being used
+
+services:
+    # Main application service (e.g., Django app)
+    app:
+        build:
+            context: . # Specifies the directory with the Dockerfile for the app
+        restart: always # Automatically restarts the container if it crashes
+        volumes:
+            - static-data:/vol/web # Mounts a shared volume for static files
+        environment: # Environment variables for the app
+            - DB_HOST=db # Hostname for the database container
+            - DB_NAME=${DB_NAME} # Database name (set in a .env file or environment)
+            - DB_USER=${DB_USER} # Database user (set in a .env file or environment)
+            - DB_PASSWORD=${DB_PASSWORD} # Database password (set in a .env file or environment)
+            - SECRET_KEY=${DJANGO_SECRET_KEY} # Secret key for Django (or similar framework)
+            - ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS} # Allowed hosts for the application
+        depends_on:
+            - db # Ensures the database container starts before this service
+
+    # Database service (PostgreSQL)
+    db:
+        image: postgres:13-alpine # Uses the official lightweight PostgreSQL image
+        restart: always # Automatically restarts the container if it crashes
+        volumes:
+            - postgres-data:/var/lib/postgresql/data # Persistent storage for database data
+        environment: # Environment variables for the PostgreSQL database
+            - POSTGRES_DB=${DB_NAME} # Database name
+            - POSTGRES_USER=${DB_USER} # Database user
+            - POSTGRES_PASSWORD=${DB_PASSWORD} # Database password
+            - POSTGRES_LOGGING_LEVEL=debug # Logging level for debugging database issues
+
+    # Proxy service (e.g., Nginx reverse proxy)
+    proxy:
+        build:
+            context: ./proxy # Specifies the directory with the Dockerfile for the proxy
+        restart: always # Automatically restarts the container if it crashes
+        depends_on:
+            - app # Ensures the app container starts before this service
+        ports:
+            - 80:8000 # Maps port 8000 inside the container to port 80 on the host machine
+        volumes:
+            - static-data:/vol/static # Mounts a shared volume for serving static files
+
+# Define shared volumes used by the services
+volumes:
+    postgres-data: # Persistent volume for the database
+    static-data: # Shared volume for static files (e.g., CSS, JS, images)
